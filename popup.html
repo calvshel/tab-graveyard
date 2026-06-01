@@ -76,6 +76,43 @@
         color: var(--accent-2);
         font-size: 12px;
       }
+      .list {
+        display: grid;
+        gap: 10px;
+        margin-top: 12px;
+        max-height: 220px;
+        overflow: auto;
+      }
+      .row {
+        display: grid;
+        gap: 6px;
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: rgba(12, 17, 25, 0.5);
+      }
+      .row-title {
+        font-weight: 700;
+        line-height: 1.25;
+      }
+      .row-meta {
+        color: var(--muted);
+        font-size: 12px;
+        word-break: break-word;
+      }
+      .row button {
+        width: fit-content;
+        margin-top: 2px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: #243244;
+        font-weight: 700;
+      }
+      .empty {
+        color: var(--muted);
+        font-size: 13px;
+        padding: 10px 0 2px;
+      }
     </style>
   </head>
   <body>
@@ -86,10 +123,12 @@
         <div id="count" class="count">0</div>
         <div class="label">Tabs that were inactive for more than 4 hours.</div>
         <button id="exhume" type="button">Exhume Graveyard</button>
+        <div id="list" class="list" aria-live="polite"></div>
         <div id="status" class="status" aria-live="polite"></div>
       </section>
       <div class="footer">Exports a Markdown archive and clears local extension storage.</div>
     </main>
+    <script src="shared.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

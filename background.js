@@ -2,10 +2,8 @@ const ALARM_NAME = "tab-graveyard-sweep";
 const STORAGE_KEY = "buriedTabs";
 const LAST_ACTIVE_KEY = "tabLastActive";
 const SETTINGS_KEY = "settings";
-const DEFAULT_SETTINGS = {
-  inactivityHours: 4,
-  protectedDomains: [],
-};
+
+importScripts("shared.js");
 
 function now() {
   return Date.now();
@@ -16,7 +14,7 @@ async function getState() {
   return {
     buriedTabs: Array.isArray(result[STORAGE_KEY]) ? result[STORAGE_KEY] : [],
     lastActive: result[LAST_ACTIVE_KEY] && typeof result[LAST_ACTIVE_KEY] === "object" ? result[LAST_ACTIVE_KEY] : {},
-    settings: normaliseSettings(result[SETTINGS_KEY]),
+    settings: TabGraveyard.normaliseSettings(result[SETTINGS_KEY]),
   };
 }
 
@@ -24,31 +22,8 @@ async function setState(nextState) {
   await chrome.storage.local.set({
     [STORAGE_KEY]: nextState.buriedTabs,
     [LAST_ACTIVE_KEY]: nextState.lastActive,
-    [SETTINGS_KEY]: normaliseSettings(nextState.settings),
+    [SETTINGS_KEY]: TabGraveyard.normaliseSettings(nextState.settings),
   });
-}
-
-function normaliseSettings(settings) {
-  const inactivityHours = Number(settings?.inactivityHours);
-  const protectedDomains = Array.isArray(settings?.protectedDomains) ? settings.protectedDomains : [];
-  return {
-    inactivityHours: Number.isFinite(inactivityHours) ? Math.min(Math.max(inactivityHours, 0.25), 168) : DEFAULT_SETTINGS.inactivityHours,
-    protectedDomains: protectedDomains
-      .map((domain) => String(domain).trim().toLowerCase())
-      .filter(Boolean)
-      .slice(0, 100),
-  };
-}
-
-function isProtectedUrl(url, protectedDomains) {
-  if (!url) return true;
-  if (url.startsWith("chrome://") || url.startsWith("chrome-extension://")) return true;
-  try {
-    const host = new URL(url).hostname.toLowerCase();
-    return protectedDomains.some((domain) => host === domain || host.endsWith(`.${domain}`));
-  } catch {
-    return true;
-  }
 }
 
 async function markTabActive(tabId) {
@@ -61,7 +36,7 @@ async function markTabActive(tabId) {
 async function buryTab(tab) {
   if (!tab || typeof tab.id !== "number") return false;
   const state = await getState();
-  if (tab.pinned || tab.active || isProtectedUrl(tab.url, state.settings.protectedDomains)) {
+  if (tab.pinned || tab.active || TabGraveyard.protectedDomainMatches(tab.url, state.settings.protectedDomains)) {
     return false;
   }
 
@@ -126,5 +101,13 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" || changeInfo.url) {
     await markTabActive(tabId);
     await buryTab(tab);
+  }
+});
+
+chrome.tabs.onRemoved.addListener(async (tabId) => {
+  const state = await getState();
+  if (state.lastActive[String(tabId)]) {
+    delete state.lastActive[String(tabId)];
+    await setState(state);
   }
 });

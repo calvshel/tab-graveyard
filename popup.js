@@ -5,38 +5,9 @@ async function loadGraveyard() {
   return Array.isArray(result[STORAGE_KEY]) ? result[STORAGE_KEY] : [];
 }
 
-function markdownEscape(value) {
-  return String(value || "")
-    .replace(/\|/g, "\\|")
-    .replace(/\n/g, " ");
-}
-
-function buildMarkdown(entries) {
-  const lines = [
-    "# Tab Graveyard",
-    "",
-    `Exported: ${new Date().toISOString()}`,
-    "",
-    "| Title | URL | Buried Timestamp |",
-    "| --- | --- | --- |",
-  ];
-
-  for (const entry of entries) {
-    lines.push(
-      `| ${markdownEscape(entry.title)} | ${markdownEscape(entry.url)} | ${markdownEscape(entry.buriedAt)} |`
-    );
-  }
-
-  if (entries.length === 0) {
-    lines.push("| - | - | - |");
-  }
-
-  return lines.join("\n");
-}
-
 async function exportGraveyard() {
   const entries = await loadGraveyard();
-  const markdown = buildMarkdown(entries);
+  const markdown = TabGraveyard.buildMarkdown(entries);
   const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
@@ -52,6 +23,65 @@ async function refreshCount() {
   document.getElementById("count").textContent = String(entries.length);
 }
 
+function graveyardRow(entry, index) {
+  const row = document.createElement("article");
+  row.className = "row";
+
+  const title = document.createElement("div");
+  title.className = "row-title";
+  title.textContent = entry.title || "Untitled Tab";
+
+  const meta = document.createElement("div");
+  meta.className = "row-meta";
+  const domain = (() => {
+    try {
+      return new URL(entry.url).hostname.replace(/^www\./, "");
+    } catch {
+      return entry.url || "";
+    }
+  })();
+  meta.textContent = `${domain} · ${entry.buriedAt || ""}`;
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = "Restore";
+  button.addEventListener("click", async () => {
+    const items = await loadGraveyard();
+    const item = items[index];
+    if (!item) {
+      return;
+    }
+    await chrome.tabs.create({ url: item.url });
+    items.splice(index, 1);
+    await chrome.storage.local.set({ [STORAGE_KEY]: items });
+    await refresh();
+  });
+
+  row.append(title, meta, button);
+  return row;
+}
+
+async function renderGraveyardList() {
+  const list = document.getElementById("list");
+  list.textContent = "";
+  const entries = await loadGraveyard();
+  if (entries.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "Nothing buried right now.";
+    list.append(empty);
+    return;
+  }
+  entries.forEach((entry, index) => {
+    list.append(graveyardRow(entry, index));
+  });
+}
+
+async function refresh() {
+  await refreshCount();
+  await renderGraveyardList();
+}
+
 document.getElementById("exhume").addEventListener("click", async () => {
   const status = document.getElementById("status");
   status.textContent = "Exhuming archive...";
@@ -64,4 +94,4 @@ document.getElementById("exhume").addEventListener("click", async () => {
   }
 });
 
-refreshCount();
+refresh();

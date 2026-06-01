@@ -1,0 +1,33 @@
+# Tab Graveyard Notes
+
+This is a small personal extension, so the main job is to keep it predictable when Chrome reloads service workers or suspends background activity.
+
+## What Feels Solid
+
+- Buried tabs are stored locally in `chrome.storage.local`
+- Options persist across reloads
+- Popup export works without any build step
+- Protected domains prevent obvious foot-guns like internal docs or inboxes being buried
+
+## Manual Test Checklist
+
+1. Load the unpacked extension in Chrome.
+2. Open a few tabs and set a low inactivity threshold in the options page.
+3. Refresh the extension from `chrome://extensions`.
+4. Confirm the popup still shows the buried count.
+5. Confirm the options page reloads the saved threshold and protected domains.
+6. Export the graveyard and check that `graveyard.md` downloads.
+7. Restore one buried tab from the popup and confirm the entry is removed.
+
+## Known Rough Edges
+
+- The inactivity sweep is periodic, so a tab can stay open a little past the threshold.
+- Service worker timing in Chrome is still a little slippery, especially after browser sleep.
+- The restore list is intentionally plain and not especially clever about sorting or search.
+- Large graveyards will make the popup feel cramped until there is filtering.
+
+## Follow-Up Ideas
+
+- Import archived Markdown files back into storage
+- Filter buried tabs by domain
+- Better restore affordances for larger graveyards
