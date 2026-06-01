@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Tab Graveyard Options</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0f141b;
+        --panel: #151d27;
+        --border: #2a3748;
+        --text: #edf2f7;
+        --muted: #9aa8b8;
+        --accent: #f97316;
+        --ok: #22c55e;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: linear-gradient(160deg, #101820, #14101a 56%, #1b1710);
+        color: var(--text);
+        font: 15px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      main {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 44px 20px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 32px;
+      }
+      p {
+        color: var(--muted);
+      }
+      form {
+        margin-top: 28px;
+        display: grid;
+        gap: 20px;
+      }
+      label {
+        display: grid;
+        gap: 8px;
+        font-weight: 700;
+      }
+      input,
+      textarea {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--panel);
+        color: var(--text);
+        font: inherit;
+        padding: 12px;
+      }
+      textarea {
+        min-height: 130px;
+        resize: vertical;
+      }
+      button {
+        width: fit-content;
+        border: 0;
+        border-radius: 10px;
+        background: var(--accent);
+        color: white;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+        padding: 12px 18px;
+      }
+      .hint,
+      .status {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .status {
+        min-height: 20px;
+        color: var(--ok);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Tab Graveyard Options</h1>
+      <p>Control how aggressively inactive tabs are buried and protect domains that should always stay open.</p>
+      <form id="options-form">
+        <label>
+          Inactivity threshold in hours
+          <input id="inactivity-hours" type="number" min="0.25" max="168" step="0.25" required />
+          <span class="hint">Default is 4 hours. Minimum is 15 minutes; maximum is 7 days.</span>
+        </label>
+        <label>
+          Protected domains
+          <textarea id="protected-domains" placeholder="github.com&#10;docs.google.com"></textarea>
+          <span class="hint">One domain per line. Subdomains are protected automatically.</span>
+        </label>
+        <button type="submit">Save Options</button>
+        <div id="status" class="status" aria-live="polite"></div>
+      </form>
+    </main>
+    <script src="options.js"></script>
+  </body>
+</html>
