@@ -1,37 +1,71 @@
 # Tab Graveyard
 
-Tab Graveyard is a Manifest V3 Chrome extension that quietly buries tabs you forgot about. If a tab stays inactive for more than four hours, it is closed, catalogued, and stored in a local graveyard so you can export the whole archive later as Markdown.
+A privacy-first Chrome extension that closes stale tabs, keeps a local record of what it buried, and lets you export the whole graveyard as Markdown.
+
+Tab Graveyard is for people who open research tabs with good intentions and then slowly turn Chrome into a museum. It watches tab activity in the background, closes tabs that have been inactive for more than four hours, and stores the title, URL, and burial timestamp locally so useful links are not lost.
 
 ## Features
 
-- Automatically tracks tab activity with Chrome alarms and tab events
-- Bury tabs that have been inactive for more than four hours
-- Store title, URL, and burial timestamp locally in the browser
-- Dark-mode popup with live buried-tab count
+- Manifest V3 Chrome extension with a lightweight service worker
+- Tracks tab activity through Chrome tab events and scheduled alarms
+- Automatically closes eligible tabs after four hours of inactivity
+- Skips pinned tabs, active tabs, and internal browser pages
+- Stores buried-tab metadata in `chrome.storage.local`
+- Dark popup with a live buried-tab count
 - One-click Markdown export to `graveyard.md`
-- Clears local extension storage after export
+- Clears the local graveyard after export
 
-## Installation
+## Install From Source
 
-1. Open Chrome and navigate to `chrome://extensions`.
-2. Enable `Developer mode`.
-3. Click `Load unpacked`.
-4. Select the `tab-graveyard` folder.
-5. Pin the extension if you want quick access from the toolbar.
+1. Clone or download this repository.
+2. Open Chrome and go to `chrome://extensions`.
+3. Enable `Developer mode`.
+4. Click `Load unpacked`.
+5. Select the `tab-graveyard` directory.
+6. Pin the extension from the toolbar if you want quick access to the graveyard count.
 
 ## Usage
 
-- Let the extension run in the background.
-- Open the popup to see how many tabs are in the graveyard.
-- Click `Exhume Graveyard` to download a Markdown archive and clear local storage.
+Tab Graveyard starts working as soon as the unpacked extension is loaded. Keep browsing normally; inactive tabs are reviewed on a recurring alarm and closed only after they pass the four-hour threshold.
 
-## Notes
+Open the extension popup to see how many tabs have been buried. Click `Exhume Graveyard` to download a Markdown archive and clear the stored graveyard.
 
-- The extension uses only local browser storage.
-- It is designed for personal productivity and does not sync data across devices.
-- Tabs that are pinned, internal browser pages, or currently active are ignored.
+## Markdown Export
 
-## MIT License
+Exports are written as a simple table:
+
+```markdown
+# Tab Graveyard
+
+| Title | URL | Buried Timestamp |
+| --- | --- | --- |
+| Example | https://example.com | 2026-06-01T07:30:00.000Z |
+```
+
+## Privacy
+
+Tab Graveyard does not use a server, analytics, tracking pixels, or external APIs. Tab metadata is stored only in local Chrome extension storage until you export and clear it.
+
+## Development
+
+This project intentionally has no build step. Edit the source files, then reload the unpacked extension from `chrome://extensions`.
+
+```text
+manifest.json   Extension metadata and permissions
+background.js   Inactivity tracking and burial logic
+popup.html      Popup layout and styling
+popup.js        Graveyard count, Markdown export, and storage clearing
+```
+
+## Roadmap
+
+- Configurable inactivity threshold
+- Allowlist for domains that should never be buried
+- Optional restore links in the popup before export
+
+## License
+
+MIT License
 
 Copyright (c) 2026 Calvin Shelwell
 
