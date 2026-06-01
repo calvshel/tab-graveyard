@@ -1,4 +1,5 @@
 const STORAGE_KEY = "buriedTabs";
+const IMPORT_FILE_ID = "import-file";
 
 async function loadGraveyard() {
   const result = await chrome.storage.local.get([STORAGE_KEY]);
@@ -71,6 +72,16 @@ async function renderGraveyardList() {
   const list = document.getElementById("list");
   list.textContent = "";
   const entries = await loadGraveyard();
+  const filterValue = document.getElementById("filter").value.trim().toLowerCase();
+  const filteredEntries = filterValue
+    ? entries.filter((entry) => {
+        try {
+          return new URL(entry.url).hostname.toLowerCase().includes(filterValue);
+        } catch {
+          return String(entry.url || "").toLowerCase().includes(filterValue);
+        }
+      })
+    : entries;
   if (entries.length === 0) {
     const empty = document.createElement("div");
     empty.className = "empty";
@@ -78,7 +89,14 @@ async function renderGraveyardList() {
     list.append(empty);
     return;
   }
-  entries.forEach((entry, index) => {
+  if (filteredEntries.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "No buried tabs match that filter.";
+    list.append(empty);
+    return;
+  }
+  filteredEntries.forEach((entry) => {
     list.append(graveyardRow(entry));
   });
 }
@@ -86,6 +104,24 @@ async function renderGraveyardList() {
 async function refresh() {
   await refreshCount();
   await renderGraveyardList();
+}
+
+async function importGraveyardFile(file) {
+  const text = await file.text();
+  const imported = TabGraveyard.parseMarkdown(text);
+  if (imported.length === 0) {
+    throw new Error("No graveyard rows found in that file.");
+  }
+  const items = await loadGraveyard();
+  const seen = new Set(items.map((entry) => entryKey(entry)));
+  for (const entry of imported) {
+    const key = entryKey(entry);
+    if (!seen.has(key)) {
+      items.push(entry);
+      seen.add(key);
+    }
+  }
+  await chrome.storage.local.set({ [STORAGE_KEY]: items });
 }
 
 document.getElementById("exhume").addEventListener("click", async () => {
@@ -98,6 +134,32 @@ document.getElementById("exhume").addEventListener("click", async () => {
   } catch (error) {
     status.textContent = `Export failed: ${error.message}`;
   }
+});
+
+document.getElementById("import").addEventListener("click", () => {
+  document.getElementById(IMPORT_FILE_ID).click();
+});
+
+document.getElementById(IMPORT_FILE_ID).addEventListener("change", async (event) => {
+  const status = document.getElementById("status");
+  const file = event.target.files && event.target.files[0];
+  if (!file) {
+    return;
+  }
+  status.textContent = "Importing graveyard...";
+  try {
+    await importGraveyardFile(file);
+    await refresh();
+    status.textContent = "graveyard.md imported.";
+  } catch (error) {
+    status.textContent = `Import failed: ${error.message}`;
+  } finally {
+    event.target.value = "";
+  }
+});
+
+document.getElementById("filter").addEventListener("input", async () => {
+  await renderGraveyardList();
 });
 
 refresh();

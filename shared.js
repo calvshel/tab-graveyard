@@ -56,12 +56,70 @@ const TabGraveyard = (() => {
     return lines.join("\n");
   }
 
+  function parseMarkdown(markdown) {
+    const lines = String(markdown || "").split(/\r?\n/);
+    const rows = [];
+    let inTable = false;
+
+    for (const line of lines) {
+      if (line.startsWith("| Title | URL | Buried Timestamp |")) {
+        inTable = true;
+        continue;
+      }
+      if (!inTable) {
+        continue;
+      }
+      if (!line.startsWith("|")) {
+        if (rows.length > 0) {
+          break;
+        }
+        continue;
+      }
+      if (/^\|[-\s|]+\|$/.test(line)) {
+        continue;
+      }
+      const cells = [];
+      let current = "";
+      let escaped = false;
+      for (let i = 1; i < line.length - 1; i += 1) {
+        const char = line[i];
+        if (escaped) {
+          current += char;
+          escaped = false;
+          continue;
+        }
+        if (char === "\\") {
+          escaped = true;
+          continue;
+        }
+        if (char === "|") {
+          cells.push(current.trim());
+          current = "";
+          continue;
+        }
+        current += char;
+      }
+      cells.push(current.trim());
+      if (cells.length !== 3 || cells[0] === "Title") {
+        continue;
+      }
+      rows.push({
+        title: cells[0],
+        url: cells[1],
+        buriedAt: cells[2],
+      });
+    }
+
+    return rows.filter((entry) => entry.url);
+  }
+
   return {
     DEFAULT_SETTINGS,
     normaliseSettings,
     protectedDomainMatches,
     markdownEscape,
     buildMarkdown,
+    parseMarkdown,
   };
 })();
 

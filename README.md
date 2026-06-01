@@ -17,6 +17,8 @@ Tab Graveyard is for people who open research tabs with good intentions and then
 - Options page for inactivity threshold and protected domains
 - Custom extension icons generated from the repository source
 - Restore buried tabs directly from the popup
+- Import previous `graveyard.md` exports
+- Filter buried tabs by domain in the popup
 
 ## Install From Source
 
@@ -36,6 +38,8 @@ Open the extension popup to see how many tabs have been buried. Click `Exhume Gr
 Open the extension options page to adjust the inactivity threshold or protect domains that should never be buried.
 
 The popup now also shows a small list of buried tabs with a `Restore` button for each entry.
+
+You can also import a previous `graveyard.md` export back into local storage and filter the list by domain when the graveyard gets crowded.
 
 ## Markdown Export
 
@@ -74,7 +78,6 @@ NOTES.md        Manual test notes and rough edges
 
 - Import previous Markdown exports
 - Per-window burial rules
-- Better search and filtering for large graveyards
 
 ## License
 

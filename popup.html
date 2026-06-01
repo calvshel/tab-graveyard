@@ -70,6 +70,29 @@
         color: var(--muted);
         font-size: 12px;
       }
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .toolbar button {
+        width: auto;
+        margin-top: 0;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: #243244;
+        font-weight: 700;
+      }
+      .filter {
+        width: 100%;
+        margin-top: 10px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: rgba(9, 13, 19, 0.7);
+        color: var(--text);
+        font: inherit;
+      }
       .status {
         margin-top: 8px;
         min-height: 18px;
@@ -122,7 +145,12 @@
         <div class="label">Buried tabs</div>
         <div id="count" class="count">0</div>
         <div class="label">Tabs that were inactive for more than 4 hours.</div>
-        <button id="exhume" type="button">Exhume Graveyard</button>
+        <input id="filter" class="filter" type="search" placeholder="Filter by domain" />
+        <div class="toolbar">
+          <button id="import" type="button">Import Graveyard</button>
+          <button id="exhume" type="button">Exhume Graveyard</button>
+        </div>
+        <input id="import-file" type="file" accept=".md,text/markdown,text/plain" hidden />
         <div id="list" class="list" aria-live="polite"></div>
         <div id="status" class="status" aria-live="polite"></div>
       </section>
