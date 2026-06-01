@@ -23,7 +23,11 @@ async function refreshCount() {
   document.getElementById("count").textContent = String(entries.length);
 }
 
-function graveyardRow(entry, index) {
+function entryKey(entry) {
+  return `${entry.buriedAt || ""}::${entry.url || ""}`;
+}
+
+function graveyardRow(entry) {
   const row = document.createElement("article");
   row.className = "row";
 
@@ -47,12 +51,14 @@ function graveyardRow(entry, index) {
   button.textContent = "Restore";
   button.addEventListener("click", async () => {
     const items = await loadGraveyard();
-    const item = items[index];
-    if (!item) {
+    const key = entryKey(entry);
+    const itemIndex = items.findIndex((candidate) => entryKey(candidate) === key);
+    if (itemIndex < 0) {
       return;
     }
+    const item = items[itemIndex];
     await chrome.tabs.create({ url: item.url });
-    items.splice(index, 1);
+    items.splice(itemIndex, 1);
     await chrome.storage.local.set({ [STORAGE_KEY]: items });
     await refresh();
   });
@@ -73,7 +79,7 @@ async function renderGraveyardList() {
     return;
   }
   entries.forEach((entry, index) => {
-    list.append(graveyardRow(entry, index));
+    list.append(graveyardRow(entry));
   });
 }
 
