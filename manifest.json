@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Tab Graveyard",
+  "version": "1.0.0",
+  "description": "Buries inactive tabs after four hours and preserves a searchable graveyard of what was closed.",
+  "permissions": ["tabs", "storage", "alarms"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Tab Graveyard",
+    "default_popup": "popup.html"
+  },
+  "minimum_chrome_version": "114"
+}
