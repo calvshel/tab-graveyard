@@ -14,6 +14,8 @@ Tab Graveyard is for people who open research tabs with good intentions and then
 - Dark popup with a live buried-tab count
 - One-click Markdown export to `graveyard.md`
 - Clears the local graveyard after export
+- Options page for inactivity threshold and protected domains
+- Custom extension icons generated from the repository source
 
 ## Install From Source
 
@@ -29,6 +31,8 @@ Tab Graveyard is for people who open research tabs with good intentions and then
 Tab Graveyard starts working as soon as the unpacked extension is loaded. Keep browsing normally; inactive tabs are reviewed on a recurring alarm and closed only after they pass the four-hour threshold.
 
 Open the extension popup to see how many tabs have been buried. Click `Exhume Graveyard` to download a Markdown archive and clear the stored graveyard.
+
+Open the extension options page to adjust the inactivity threshold or protect domains that should never be buried.
 
 ## Markdown Export
 
@@ -55,13 +59,16 @@ manifest.json   Extension metadata and permissions
 background.js   Inactivity tracking and burial logic
 popup.html      Popup layout and styling
 popup.js        Graveyard count, Markdown export, and storage clearing
+options.html    Settings UI
+options.js      Settings persistence and validation
+icons/          Extension icon source and generated PNGs
 ```
 
 ## Roadmap
 
-- Configurable inactivity threshold
-- Allowlist for domains that should never be buried
 - Optional restore links in the popup before export
+- Import previous Markdown exports
+- Per-window burial rules
 
 ## License
 
